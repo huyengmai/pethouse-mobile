@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pethouse</string>
+    <string name="title_activity_main">Pethouse</string>
+    <string name="package_name">com.pethouse.app</string>
+    <string name="custom_url_scheme">com.pethouse.app</string>
+</resources>

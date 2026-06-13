@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@clerk/clerk-react": "^5.59.0",
+    "pg": "^8.16.3"
+  }
+}
