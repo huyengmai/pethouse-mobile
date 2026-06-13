@@ -68,8 +68,8 @@ const AdminModuleCard = ({ mod, index, navigate }) => {
       className="admin-card-v3"
       style={{
         backgroundColor: 'white',
-        padding: '45px',
-        borderRadius: '45px',
+        padding: '20px',
+        borderRadius: '20px',
         boxShadow: '0 15px 40px rgba(0,0,0,0.04)',
         border: `2px solid transparent`,
         cursor: 'pointer',
@@ -85,17 +85,17 @@ const AdminModuleCard = ({ mod, index, navigate }) => {
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: mod.accent }}></div>
       <div style={{
-        width: '75px', height: '75px', borderRadius: '22px',
+        width: '55px', height: '55px', borderRadius: '22px',
         backgroundColor: mod.bgColor, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: '36px', marginBottom: '30px',
+        justifyContent: 'center', fontSize: '26px', marginBottom: '16px',
         boxShadow: `0 10px 20px ${mod.accent}22`
       }}>
         {mod.icon}
       </div>
-      <h3 style={{ fontSize: '1.7rem', fontWeight: '700', marginBottom: '15px', color: '#1B3A4B' }}>
+      <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '15px', color: '#1B3A4B' }}>
         {mod.title}
       </h3>
-      <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.7, marginBottom: '40px', height: '50px' }}>
+      <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.6, marginBottom: '20px' }}>
         {mod.desc}
       </p>
       <div style={{
@@ -129,8 +129,8 @@ const StatisticCard = ({ title, icon, value, accentColor, bgColor, delay = 0 }) 
       ref={ref}
       style={{
         backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '35px',
+        padding: '20px',
+        borderRadius: '20px',
         boxShadow: '0 15px 40px rgba(0,0,0,0.04)',
         transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         opacity: isVisible ? 1 : 0,
@@ -141,28 +141,28 @@ const StatisticCard = ({ title, icon, value, accentColor, bgColor, delay = 0 }) 
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        minHeight: '200px',
+        minHeight: '140px',
         borderBottom: `6px solid ${accentColor}`
       }}
     >
       <div style={{
-        width: '65px',
-        height: '65px',
+        width: '50px',
+        height: '50px',
         borderRadius: '20px',
         backgroundColor: bgColor,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '30px',
+        fontSize: '24px',
         marginBottom: '20px',
         boxShadow: `0 8px 15px ${accentColor}22`
       }}>
         {icon}
       </div>
-      <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '10px', color: '#1B3A4B' }}>
+      <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '10px', color: '#1B3A4B' }}>
         {title}
       </h3>
-      <div style={{ fontSize: '2.5rem', fontWeight: '800', color: accentColor }}>
+      <div style={{ fontSize: '2rem', fontWeight: '800', color: accentColor }}>
         {value !== null ? <AnimatedNumber value={value} /> : '...'}
       </div>
     </div>
@@ -235,46 +235,61 @@ useEffect(() => {
   ];
 
   return (
-    <div style={{ color: '#1B3A4B', maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ color: '#1B3A4B', maxWidth: '1400px', margin: '0 auto', padding: '0 12px' }}>
       {/* --- HERO SECTION --- */}
       <section style={{
         background: 'linear-gradient(135deg, #1B3A4B 0%, #2D5A6B 100%)',
-        borderRadius: '35px',
-        padding: '70px 45px',
-        marginBottom: '60px',
+        borderRadius: '24px',
+        padding: '32px 20px',
+        marginBottom: '32px',
         color: 'white',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 20px 40px rgba(27, 58, 75, 0.2)'
+        boxShadow: '0 10px 25px rgba(27,58,75,0.15)'
       }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.1, backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
 
-        <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px', alignItems: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr',
+                                                                        gap: '24px', alignItems: 'center' }}>
           <div>
-            <div className="animate-bounce-slow" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,217,61,0.2)', color: '#FFD93D', padding: '8px 20px', borderRadius: '50px', fontSize: '14px', fontWeight: '800', marginBottom: '20px' }}>
+            <div className="animate-bounce-slow" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,217,61,0.2)', color: '#FFD93D', padding: '6px 14px', borderRadius: '50px', fontSize: '12px', fontWeight: '800', marginBottom: '20px' }}>
               🛠️ QUẢN TRỊ VIÊN
             </div>
-            <h1 style={{ fontSize: '3.2rem', fontWeight: '700', lineHeight: 1.2, marginBottom: '20px' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: '700', lineHeight: 1.3, marginBottom: '20px' }}>
               Vận hành <span style={{ color: '#FFD93D' }}>PetHouse</span> <br />
               theo cách của bạn!
             </h1>
-            <p style={{ fontSize: '1.1rem', opacity: 0.8, maxWidth: '500px', marginBottom: '30px' }}>
+            <p style={{ fontSize: '14px',
+                        opacity: 0.85,
+                        lineHeight: '24px',
+                        marginBottom: '24px' }}>
               Tùy chỉnh hệ thống, thiết lập các quy tắc thông minh để mang lại trải nghiệm tốt nhất cho thú cưng.
             </p>
 
-            <div style={{ display: 'flex', gap: '40px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px'
+              }}
+            >
               <div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#FFD93D' }}><AnimatedNumber value={1240} />+</div>
+                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#FFD93D' }}><AnimatedNumber value={1240} />+</div>
                 <div style={{ fontSize: '12px', opacity: 0.6, fontWeight: '700' }}>NGƯỜI DÙNG HIỆN TẠI</div>
               </div>
               <div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#4CAF50' }}><AnimatedNumber value={45} />+</div>
+                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#4CAF50' }}><AnimatedNumber value={45} />+</div>
                 <div style={{ fontSize: '12px', opacity: 0.6, fontWeight: '700' }}>CẤU HÌNH MẪU</div>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }} className="hidden lg:flex">
+          <div
+            style={{
+              display: window.innerWidth > 1024 ? 'flex' : 'none',
+              justifyContent: 'center'
+            }}
+          >
             <div className="animate-float" style={{ width: '220px', height: '220px', background: 'rgba(255,255,255,0.1)', borderRadius: '60px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '100px' }}>
               ⚙️
             </div>
@@ -285,12 +300,12 @@ useEffect(() => {
       {/* --- STATS SECTION --- */}
       <section style={{ padding: '20px 0', marginBottom: '60px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '2.8rem', fontWeight: '700', marginBottom: '10px' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '10px' }}>
             Tổng quan <span style={{ color: '#FFD93D', textShadow: '1px 1px 0px #1B3A4B' }}>Dữ liệu</span>
           </h2>
           <p style={{ color: '#94A3B8', fontSize: '18px', fontWeight: '500' }}>Các số liệu thống kê quan trọng của hệ thống</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
           <StatisticCard
             title="Tổng số Người dùng"
             icon="🧑‍🤝‍🧑"
@@ -317,10 +332,10 @@ useEffect(() => {
           <h2 style={{ fontSize: '2.8rem', fontWeight: '700', marginBottom: '10px' }}>
             Trung tâm <span style={{ color: '#FFD93D', textShadow: '1px 1px 0px #1B3A4B' }}>Quản trị</span>
           </h2>
-          <p style={{ color: '#94A3B8', fontSize: '18px', fontWeight: '500' }}>Lựa chọn phân vùng để bắt đầu cấu hình hệ thống</p>
+          <p style={{ color: '#94A3B8', fontSize: '14px', fontWeight: '500' }}>Lựa chọn phân vùng để bắt đầu cấu hình hệ thống</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
           {modules.map((mod, index) => (
             <AdminModuleCard key={mod.id} mod={mod} index={index} navigate={navigate} />
           ))}
@@ -330,8 +345,8 @@ useEffect(() => {
       {/* --- CTA SECTION --- */}
       <section style={{
         marginTop: '80px',
-        padding: '60px',
-        borderRadius: '45px',
+        padding: '28px 20px',
+        borderRadius: '24px',
         backgroundColor: '#1B3A4B',
         textAlign: 'center',
         position: 'relative',
@@ -342,19 +357,21 @@ useEffect(() => {
           PET HOUSE ADMIN • SYSTEM CONTROL • PET HOUSE ADMIN • SYSTEM CONTROL •&nbsp;
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontSize: '2.8rem', fontWeight: '700', color: 'white', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: 'white', marginBottom: '20px' }}>
             Vận hành hệ thống ngay! 
           </h2>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px' }}>
             <button
               onClick={() => navigate('/')}
-              style={{ padding: '18px 45px', background: '#FFD93D', color: '#1B3A4B', border: 'none', borderRadius: '20px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
+              style={{ padding: '14px', width: '100%', background: '#FFD93D', color: '#1B3A4B', border: 'none', borderRadius: '14px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
             >
               🌐 Trang chủ Client
             </button>
             <button
               onClick={() => window.location.reload()}
-              style={{ padding: '18px 45px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '2px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
+              style={{ padding: '14px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '2px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
             >
               🔄 Làm mới dữ liệu
             </button>

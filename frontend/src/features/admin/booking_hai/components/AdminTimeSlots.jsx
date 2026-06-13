@@ -252,28 +252,33 @@ const AdminTimeSlots = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
+        {/* Phần Tiêu đề */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý khung giờ</h1>
-          <p className="text-gray-600 mt-1">Tạo và quản lý các khung giờ đặt lịch</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Quản lý khung giờ</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Tạo và quản lý các khung giờ đặt lịch</p>
         </div>
-        <div className="flex gap-3">
+
+        {/* Phần Nút bấm (Tự động chia đôi full-width trên mobile, co gọn trên PC) */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto">
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+            className="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
-            <Plus size={20} />
-            Tạo khung giờ
+            <Plus size={16} />
+            <span>Tạo khung giờ</span>
           </button>
+
           <button
             onClick={openBulkModal}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+            className="flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
-            <Calendar size={20} />
-            Tạo hàng loạt
+            <Calendar size={16} />
+            <span>Tạo hàng loạt</span>
           </button>
         </div>
       </div>
+
       {/* Filters */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-6">
         <div className="flex items-center gap-2 mb-4">

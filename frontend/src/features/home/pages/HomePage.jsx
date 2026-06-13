@@ -178,18 +178,20 @@ className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text
             </div>
 
             {/* Stats */}
-            <div className="flex gap-8 lg:gap-10 justify-center lg:justify-start">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">50K+</div>
-                <div className="text-sm text-gray-600">Người dùng</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white rounded-xl p-3 shadow-sm text-center">
+                <p className="text-xl font-bold text-primary">50K+</p>
+                <p className="text-xs text-gray-500 mt-1">Người dùng</p>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">100K+</div>
-                <div className="text-sm text-gray-600">Thú cưng</div>
+
+              <div className="bg-white rounded-xl p-3 shadow-sm text-center">
+                <p className="text-xl font-bold text-primary">100K+</p>
+                <p className="text-xs text-gray-500 mt-1">Thú cưng</p>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">4.9⭐</div>
-                <div className="text-sm text-gray-600">Đánh giá</div>
+
+              <div className="bg-white rounded-xl p-3 shadow-sm text-center">
+                <p className="text-xl font-bold text-primary">4.9⭐</p>
+                <p className="text-xs text-gray-500 mt-1">Đánh giá</p>
               </div>
             </div>
           </div>
@@ -420,8 +422,9 @@ function CTASection() {
           <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-white mb-5">
             Sẵn sàng chăm sóc thú cưng tốt hơn?  🐾
           </h2>
-          <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
-            Đăng ký miễn phí ngay hôm nay và trải nghiệm cách quản lý thú cưng thông minh nhất
+          <p className="text-sm text-white/80 leading-relaxed max-w-xs mx-auto mb-6 px-4">
+            Đăng ký miễn phí ngay hôm nay <br />
+            và trải nghiệm quản lý thú cưng thông minh.
           </p>
           {!authHelpers.isAuthenticated() && (
             <Link
