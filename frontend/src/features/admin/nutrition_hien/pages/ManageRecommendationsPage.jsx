@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, Sparkles } from 'lucide-react';
 import { adminNutritionApi } from '../services/adminNutritionApi';
 
 export default function ManageRecommendationsPage() {
@@ -24,7 +24,6 @@ export default function ManageRecommendationsPage() {
 
   useEffect(() => {
     if (selectedRule) {
-      // ✅ FIX: Backend trả về recommendations array trong rule
       const ruleRecs = selectedRule.recommendations || [];
       setRecommendations(ruleRecs);
     }
@@ -39,8 +38,8 @@ export default function ManageRecommendationsPage() {
         setSelectedRule(data[0]);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Không thể tải danh sách rules');
+      console.error('Error fetching rules:', error);
+      alert('Không thể tải danh sách quy tắc');
     } finally {
       setLoading(false);
     }
@@ -48,44 +47,41 @@ export default function ManageRecommendationsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedRule) return;
+
     try {
-      // Convert string to number before sending to API
-      const payload = {
-        recommendedCalories: parseFloat(formData.recommendedCalories) || 0,
-        recommendedProtein: parseFloat(formData.recommendedProtein) || 0,
-        recommendedFat: parseFloat(formData.recommendedFat) || 0,
-        recommendedCarbs: parseFloat(formData.recommendedCarbs) || 0,
-        notes: formData.notes || ''
-      };
-
-      console.log('Sending payload:', payload);
-
       if (editingRecommendation) {
-        await adminNutritionApi.updateRecommendation(editingRecommendation.id, payload);
-        alert('✅ Cập nhật recommendation thành công!');
+        await adminNutritionApi.updateRecommendation(editingRecommendation.id, formData);
       } else {
-        await adminNutritionApi.createRecommendationForRule(selectedRule.id, payload);
-        alert('✅ Tạo recommendation thành công!');
+        await adminNutritionApi.createRecommendation(selectedRule.id, formData);
       }
       setShowModal(false);
       setEditingRecommendation(null);
       resetForm();
-      fetchRules(); // Refresh để lấy recommendations mới
+
+      const updatedRules = await adminNutritionApi.getAllRules();
+      setRules(updatedRules);
+      const currentRule = updatedRules.find(r => r.id === selectedRule.id);
+      if (currentRule) setSelectedRule(currentRule);
+
     } catch (error) {
-      console.error('Error:', error);
-      const errorMsg = error.response?.data?.message || error.message || 'Có lỗi xảy ra!';
-      alert('❌ Lỗi: ' + errorMsg);
+      console.error('Error saving recommendation:', error);
+      alert('Có lỗi xảy ra khi lưu dữ liệu!');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Xóa recommendation này?')) return;
+    if (!window.confirm('Bạn có chắc chắn muốn xóa khuyến nghị này?')) return;
     try {
       await adminNutritionApi.deleteRecommendation(id);
-      fetchRules();
+
+      const updatedRules = await adminNutritionApi.getAllRules();
+      setRules(updatedRules);
+      const currentRule = updatedRules.find(r => r.id === selectedRule.id);
+      if (currentRule) setSelectedRule(currentRule);
     } catch (error) {
-      console.error('Error:', error);
-      alert('Không thể xóa!');
+      console.error('Error deleting recommendation:', error);
+      alert('Không thể xóa dữ liệu!');
     }
   };
 
@@ -99,304 +95,226 @@ export default function ManageRecommendationsPage() {
     });
   };
 
-  const getRuleDisplayName = (rule) => {
-    const parts = [];
-    if (rule.species) parts.push(rule.species);
-    if (rule.breed) parts.push(rule.breed);
-    if (rule.minAgeMonth || rule.maxAgeMonth) {
-      parts.push(`${rule.minAgeMonth || 0}-${rule.maxAgeMonth || '∞'} tháng`);
-    }
-    if (rule.minWeight || rule.maxWeight) {
-      parts.push(`${rule.minWeight || 0}-${rule.maxWeight || '∞'} kg`);
-    }
-    if (rule.activityLevel) parts.push(rule.activityLevel);
-    return parts.join(' • ') || 'General Rule';
-  };
-
-  // ✅ NEW: Check if rule already has recommendation
-  const ruleHasRecommendation = (rule) => {
-    return rule.recommendations && rule.recommendations.length > 0;
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-bg-purple py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            to="/admin/nutrition"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+    <div className="min-h-screen bg-slate-50 text-slate-800 pb-24">
+      {/* Header Sticky */}
+      <div className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10 shadow-sm">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <Link to="/admin/nutrition" className="text-gray-600 active:text-gray-900 flex items-center gap-1.5 text-xs font-medium">
+              <ArrowLeft size={16} />
+              <span>Dashboard</span>
+            </Link>
+            <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full uppercase tracking-wider">
+              Diet Menu
+            </span>
+          </div>
+          <div>
+            <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Khuyến nghị khẩu phần</h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Bộ chọn Quy tắc */}
+        <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm">
+          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">
+            Chọn nhóm quy tắc áp dụng:
+          </label>
+          <select
+            value={selectedRule?.id || ''}
+            onChange={(e) => {
+              const rule = rules.find(r => r.id === parseInt(e.target.value));
+              if (rule) setSelectedRule(rule);
+            }}
+            className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl font-medium text-xs focus:outline-none"
           >
-            <ArrowLeft className="w-6 h-6 text-primary" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-primary mb-2">💡 Nutrition Recommendations</h1>
-            <p className="text-gray-600">Định nghĩa khuyến nghị dinh dưỡng cho từng rule</p>
-          </div>
+            {rules.map((rule) => (
+              <option key={rule.id} value={rule.id}>
+                {rule.species} - {rule.breed || 'Mọi giống'} ({rule.minAgeMonth}-{rule.maxAgeMonth} thg)
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Info Banner */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-8">
-          <h3 className="font-bold text-primary mb-2">📌 Cách hoạt động</h3>
-          <ul className="space-y-1 text-sm text-gray-700">
-            <li>• Mỗi <strong>Nutrition Rule</strong> chỉ có <strong>1 Recommendation</strong></li>
-            <li>• Recommendation định nghĩa calories, protein, fat, carbs khuyến nghị</li>
-            <li>• User sẽ nhận được recommendation phù hợp với thú cưng của họ</li>
-          </ul>
-        </div>
+        {/* Nút thêm mới */}
+        <button
+          onClick={() => {
+            resetForm();
+            setEditingRecommendation(null);
+            setShowModal(true);
+          }}
+          disabled={!selectedRule}
+          className="w-full bg-purple-600 active:bg-purple-700 disabled:bg-gray-200 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.99] text-sm"
+        >
+          <Plus size={18} />
+          Thêm giá trị khuyến nghị
+        </button>
 
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-            <p className="mt-4 text-gray-600">Đang tải...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left: Rules List */}
-            <div className="lg:col-span-1 bg-white rounded-2xl p-6 shadow-sm h-fit">
-              <h3 className="text-lg font-bold text-primary mb-4">Chọn Rule</h3>
-              <div className="space-y-2">
-                {rules.map((rule) => (
-                  <button
-                    key={rule.id}
-                    onClick={() => setSelectedRule(rule)}
-                    className={`w-full text-left p-4 rounded-xl transition-all ${
-                      selectedRule?.id === rule.id
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-50 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="font-semibold text-sm mb-1">
-                      {getRuleDisplayName(rule)}
-                    </div>
-                    <div className={`text-xs ${
-                      selectedRule?.id === rule.id ? 'text-white/80' : 'text-gray-500'
-                    }`}>
-                      {/* ✅ FIX: Show status */}
-                      {ruleHasRecommendation(rule) ? (
-                        <span className="text-green-500">✓ Đã có recommendation</span>
-                      ) : (
-                        <span className="text-orange-500">⚠ Chưa có recommendation</span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+        {/* Danh sách thẻ */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">Giá trị hiện tại</h2>
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
             </div>
-
-            {/* Right: Recommendations */}
-            <div className="lg:col-span-2">
-              {selectedRule ? (
-                <>
-                  <div className="flex justify-between items-center mb-6">
+          ) : recommendations.length === 0 ? (
+            <div className="bg-white rounded-2xl p-8 text-center border border-dashed border-gray-200">
+              <p className="text-gray-400 text-xs">Quy tắc này chưa thiết lập chỉ số dinh dưỡng</p>
+            </div>
+          ) : (
+            recommendations.map((rec) => (
+              <div key={rec.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="bg-red-50/50 p-2.5 rounded-xl border border-red-100/40 flex items-center gap-2">
+                    <span className="text-xl">🔥</span>
                     <div>
-                      <h3 className="text-xl font-bold text-primary mb-1">
-                        Recommendations cho Rule
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {getRuleDisplayName(selectedRule)}
-                      </p>
+                      <div className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Năng lượng</div>
+                      <div className="text-sm font-black text-slate-800">{rec.recommendedCalories} <span className="text-[10px] font-normal text-gray-500">kcal</span></div>
                     </div>
-                    {/* ✅ FIX: Disable button if already has recommendation */}
-                    <button
-                      onClick={() => {
-                        resetForm();
-                        setEditingRecommendation(null);
-                        setShowModal(true);
-                      }}
-                      disabled={ruleHasRecommendation(selectedRule)}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 ${
-                        ruleHasRecommendation(selectedRule)
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-primary text-white hover:bg-primary-light'
-                      }`}
-                    >
-                      <span>➕</span>
-                      {ruleHasRecommendation(selectedRule) ? 'Đã có Recommendation' : 'Tạo Recommendation'}
-                    </button>
                   </div>
 
-                  {recommendations.length > 0 ? (
-                    <div className="space-y-4">
-                      {recommendations.map((rec) => (
-                        <div key={rec.id} className="bg-white rounded-2xl p-6 shadow-sm">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="grid grid-cols-4 gap-4 flex-1">
-                              <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">
-                                  {rec.recommendedCalories}
-                                </div>
-                                <div className="text-xs text-gray-600">Calories</div>
-                              </div>
-                              <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">
-                                  {rec.recommendedProtein}g
-                                </div>
-                                <div className="text-xs text-gray-600">Protein</div>
-                              </div>
-                              <div className="text-center">
-                                <div className="text-2xl font-bold text-yellow-600">
-                                  {rec.recommendedFat}g
-                                </div>
-                                <div className="text-xs text-gray-600">Fat</div>
-                              </div>
-                              <div className="text-center">
-                                <div className="text-2xl font-bold text-blue-600">
-                                  {rec.recommendedCarbs}g
-                                </div>
-                                <div className="text-xs text-gray-600">Carbs</div>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  setEditingRecommendation(rec);
-                                  setFormData({
-                                    recommendedCalories: rec.recommendedCalories,
-                                    recommendedProtein: rec.recommendedProtein,
-                                    recommendedFat: rec.recommendedFat,
-                                    recommendedCarbs: rec.recommendedCarbs,
-                                    notes: rec.notes || ''
-                                  });
-                                  setShowModal(true);
-                                }}
-                                className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-200"
-                              >
-                                Sửa
-                              </button>
-                              <button
-                                onClick={() => handleDelete(rec.id)}
-                                className="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-200"
-                              >
-                                Xóa
-                              </button>
-                            </div>
-                          </div>
-                          {rec.notes && (
-                            <div className="bg-gray-50 rounded-xl p-3">
-                              <p className="text-sm text-gray-700">{rec.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                  <div className="bg-amber-50/50 p-2.5 rounded-xl border border-amber-100/40 flex items-center gap-2">
+                    <span className="text-xl">🥩</span>
+                    <div>
+                      <div className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">Đạm (Protein)</div>
+                      <div className="text-sm font-black text-slate-800">{rec.recommendedProtein} <span className="text-[10px] font-normal text-gray-500">g</span></div>
                     </div>
-                  ) : (
-                    <div className="text-center py-20 bg-white rounded-2xl">
-                      <div className="text-6xl mb-4">💡</div>
-                      <h3 className="text-2xl font-bold text-primary mb-2">
-                        Chưa có Recommendations
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Tạo recommendation đầu tiên cho rule này!
-                      </p>
-                      <button
-                        onClick={() => {
-                          resetForm();
-                          setEditingRecommendation(null);
-                          setShowModal(true);
-                        }}
-                        className="px-8 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-light transition-all"
-                      >
-                        Tạo ngay
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-20 bg-white rounded-2xl">
-                  <div className="text-6xl mb-4">👈</div>
-                  <h3 className="text-2xl font-bold text-primary mb-2">
-                    Chọn một Rule
-                  </h3>
-                  <p className="text-gray-600">
-                    Chọn rule từ danh sách bên trái để xem recommendations
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                  </div>
 
-        {/* Modal */}
+                  <div className="bg-blue-50/50 p-2.5 rounded-xl border border-blue-100/40 flex items-center gap-2">
+                    <span className="text-xl">🥑</span>
+                    <div>
+                      <div className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">Béo (Fat)</div>
+                      <div className="text-sm font-black text-slate-800">{rec.recommendedFat} <span className="text-[10px] font-normal text-gray-500">g</span></div>
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100/40 flex items-center gap-2">
+                    <span className="text-xl">🌾</span>
+                    <div>
+                      <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">Tinh bột (Carbs)</div>
+                      <div className="text-sm font-black text-slate-800">{rec.recommendedCarbs} <span className="text-[10px] font-normal text-gray-500">g</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                {rec.notes && (
+                  <div className="bg-slate-50 p-2 rounded-lg text-[11px] text-gray-500 italic">
+                    * {rec.notes}
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-50">
+                  <button
+                    onClick={() => {
+                      setEditingRecommendation(rec);
+                      setFormData({
+                        recommendedCalories: rec.recommendedCalories,
+                        recommendedProtein: rec.recommendedProtein,
+                        recommendedFat: rec.recommendedFat,
+                        recommendedCarbs: rec.recommendedCarbs,
+                        notes: rec.notes || ''
+                      });
+                      setShowModal(true);
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 active:bg-slate-200 rounded-xl text-xs font-semibold"
+                  >
+                    <Edit2 size={12} />
+                    Sửa
+                  </button>
+                  <button
+                    onClick={() => handleDelete(rec.id)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 active:bg-red-100 rounded-xl text-xs font-semibold"
+                  >
+                    <Trash2 size={12} />
+                    Xóa
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Modal Form di động Bottom-Sheet */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl">
-              <h2 className="text-2xl font-bold text-primary mb-6">
-                {editingRecommendation ? 'Sửa Recommendation' : 'Tạo Recommendation'}
-              </h2>
-              
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in">
+            {/* max-h-[82vh] và pb-28 tạo không gian trống đẩy nút bấm trồi hẳn lên trên Bottom Nav di động */}
+            <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl pt-5 px-5 pb-28 sm:pb-5 shadow-2xl max-h-[82vh] overflow-y-auto transform transition-all">
+              <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+
+              <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-1.5">
+                <Sparkles size={18} className="text-purple-600" />
+                {editingRecommendation ? 'Cập nhật khuyến nghị' : 'Tạo mức khuyến nghị mới'}
+              </h3>
+
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Calories *
-                    </label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Mức Calo (kcal) *</label>
                     <input
                       type="number"
+                      required
                       value={formData.recommendedCalories}
                       onChange={(e) => setFormData({ ...formData, recommendedCalories: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none"
-                      required
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl focus:border-purple-500 focus:bg-white focus:outline-none text-sm"
+                      placeholder="0"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Protein (g) *
-                    </label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Đạm / Protein (g) *</label>
                     <input
                       type="number"
                       step="0.1"
+                      required
                       value={formData.recommendedProtein}
                       onChange={(e) => setFormData({ ...formData, recommendedProtein: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none"
-                      required
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl focus:border-purple-500 focus:bg-white focus:outline-none text-sm"
+                      placeholder="0.0"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Fat (g) *
-                    </label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Chất béo / Fat (g) *</label>
                     <input
                       type="number"
                       step="0.1"
+                      required
                       value={formData.recommendedFat}
                       onChange={(e) => setFormData({ ...formData, recommendedFat: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none"
-                      required
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl focus:border-purple-500 focus:bg-white focus:outline-none text-sm"
+                      placeholder="0.0"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Carbs (g) *
-                    </label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Tinh bột / Carbs (g) *</label>
                     <input
                       type="number"
                       step="0.1"
+                      required
                       value={formData.recommendedCarbs}
                       onChange={(e) => setFormData({ ...formData, recommendedCarbs: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none"
-                      required
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl focus:border-purple-500 focus:bg-white focus:outline-none text-sm"
+                      placeholder="0.0"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ghi chú
-                  </label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Ghi chú bổ sung</label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none"
-                    rows="3"
-                    placeholder="Lưu ý đặc biệt cho recommendation này..."
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl focus:border-purple-500 focus:bg-white focus:outline-none text-sm"
+                    rows="2"
+                    placeholder="Lưu ý đặc biệt (nếu có)..."
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-2 mb-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -404,15 +322,15 @@ export default function ManageRecommendationsPage() {
                       setEditingRecommendation(null);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold text-xs transition-colors"
                   >
-                    Hủy
+                    HỦY
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-light transition-all"
+                    className="flex-1 py-3 bg-purple-600 text-white rounded-2xl font-bold text-xs transition-colors shadow-md"
                   >
-                    {editingRecommendation ? 'Cập nhật' : 'Tạo'}
+                    {editingRecommendation ? 'CẬP NHẬT' : 'THÊM MỚI'}
                   </button>
                 </div>
               </form>
